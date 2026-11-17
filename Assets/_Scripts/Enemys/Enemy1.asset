@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Esqueleto
   prefab: {fileID: 4259744977904392136, guid: 7a150902162ffa44983fc807fb85a683, type: 3}
-  maxHp: 40
+  maxHp: 20
   moveSpeed: 4.5
   contactDamage: 10
   knockbackResistance: 1

@@ -91,6 +91,21 @@ public class EnemyController : MonoBehaviour, InDamage
         _knockbackVelocity = Vector3.Lerp(_knockbackVelocity, Vector3.zero, 10f * Time.fixedDeltaTime);
     }
 
+    private void OnCollisionStay(Collision collision)
+    {
+        if (_isDead) return;
+
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            if (collision.gameObject.TryGetComponent(out PlayerHealth playerHealth))
+            {
+                float dmg = data != null ? data.contactDamage : 10f;
+                Vector3 hitPoint = collision.GetContact(0).point;
+                playerHealth.TakeDamage(dmg, hitPoint, Vector3.zero, false);
+            }
+        }
+    }
+
     public void TakeDamage(float amount, Vector3 hitPoint, Vector3 knockbackForce, bool isCrit)
     {
         if (_isDead) return;
