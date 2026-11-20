@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class AutoProjectile : MonoBehaviour
+public class AutoProjectile : MonoBehaviour, IProjectile
 {
     public float lifeTime = 3f;
 
@@ -12,22 +12,23 @@ public class AutoProjectile : MonoBehaviour
     private LayerMask _targetLayer;
     private float _timer;
 
-    public void Initialize(Vector3 direction, float speed, float damage, float knockback, bool isCrit, LayerMask targetLayer)
+    public void Initialize(ProjectileInitData data)
     {
-        _direction = direction.normalized;
-        _speed = speed;
-        _damage = damage;
-        _knockback = knockback;
-        _isCrit = isCrit;
-        _targetLayer = targetLayer;
+        _direction = data.direction.normalized;
+        _speed = data.speed;
+        _damage = data.damage;
+        _knockback = data.knockback;
+        _isCrit = data.isCrit;
+        _targetLayer = data.targetLayer;
         _timer = lifeTime;
+
+        transform.localScale *= data.areaMultiplier;
     }
 
     private void Update()
     {
         float moveStep = _speed * Time.deltaTime;
 
-        // Raycast corto para evitar que proyectiles rápidos atraviesen enemigos entre frames
         if (Physics.Raycast(transform.position, _direction, out RaycastHit hit, moveStep + 0.2f, _targetLayer, QueryTriggerInteraction.Collide))
         {
             if (hit.collider.TryGetComponent(out InDamage damageable))

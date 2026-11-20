@@ -70,9 +70,10 @@ public class WeaponManager : MonoBehaviour
 
         int totalProjectiles = weapon.data.GetProjectileCount(weapon.level) + bonusProjectiles;
         Vector3 spawnOrigin = transform.position + Vector3.up * 1f;
-        Vector3 baseDir = (primaryTarget.position + Vector3.up * 0.8f - spawnOrigin).normalized;
+        Vector3 targetCenter = primaryTarget.position + Vector3.up * 0.5f;
+        Vector3 baseDir = (targetCenter - spawnOrigin).normalized;
 
-        float spreadAngle = 10f;
+        float spreadAngle = 12f;
         float startAngle = -spreadAngle * (totalProjectiles - 1) * 0.5f;
 
         for (int i = 0; i < totalProjectiles; i++)
@@ -80,13 +81,27 @@ public class WeaponManager : MonoBehaviour
             Quaternion spreadRot = Quaternion.Euler(0f, startAngle + (spreadAngle * i), 0f);
             Vector3 shotDir = spreadRot * baseDir;
 
-            GameObject projObj = Instantiate(weapon.data.projectilePrefab, spawnOrigin, Quaternion.LookRotation(shotDir));
-            projObj.transform.localScale *= areaMultiplier;
+            // Si dispara múltiples bombas, desplaza ligeramente el punto de caída
+            Vector3 finalTargetPos = spawnOrigin + shotDir * Vector3.Distance(spawnOrigin, targetCenter);
+            finalTargetPos.y = primaryTarget.position.y;
 
-            if (projObj.TryGetComponent(out AutoProjectile projectile))
+            GameObject projObj = Instantiate(weapon.data.projectilePrefab, spawnOrigin, Quaternion.LookRotation(shotDir));
+
+            if (projObj.TryGetComponent(out IProjectile projectile))
             {
                 float finalDamage = CalculateDamage(weapon.data.GetDamage(weapon.level), out bool isCrit);
-                projectile.Initialize(shotDir, weapon.data.projectileSpeed, finalDamage, weapon.data.knockback, isCrit, enemyLayer);
+                projectile.Initialize(new ProjectileInitData
+                {
+                    direction = shotDir,
+                    targetPosition = finalTargetPos,
+                    speed = weapon.data.projectileSpeed,
+                    damage = finalDamage,
+                    knockback = weapon.data.knockback,
+                    areaMultiplier = areaMultiplier,
+                    weaponLevel = weapon.level,
+                    isCrit = isCrit,
+                    targetLayer = enemyLayer
+                });
             }
         }
     }

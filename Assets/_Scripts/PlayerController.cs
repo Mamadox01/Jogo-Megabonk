@@ -26,6 +26,12 @@ public class PlayerController : MonoBehaviour
     private InputAction _moveAction;
     private InputAction _jumpAction;
     private InputAction _slideAction;
+    private Animator anim;
+
+    void start()
+    {
+        anim = GetComponent<Animator>();
+    }
 
     private void Awake()
     {
